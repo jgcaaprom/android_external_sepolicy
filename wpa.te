@@ -34,9 +34,7 @@ allow wpa keystore:keystore_key {
 
 # Allow wpa_cli to work. wpa_cli creates a socket in
 # /data/misc/wifi/sockets which wpa supplicant communicates with.
-userdebug_or_eng(`
   unix_socket_send(wpa, wpa, su)
-')
 
 ###
 ### neverallow rules
