@@ -181,8 +181,6 @@ neverallow {
   -vold
   -dumpstate
   -system_server
-  -procrank
-  -perfprofd
 } self:capability sys_ptrace;
 
 # Limit device node creation to these whitelisted domains.
@@ -315,18 +313,18 @@ neverallow { domain -recovery -kernel } { system_file exec_type }:dir_file_class
 neverallow domain { system_file exec_type }:dir_file_class_set mounton;
 
 # Nothing should be writing to files in the rootfs.
-ifelse(shipping_build, `true',
-  `neverallow domain rootfs:file { create write setattr relabelto append unlink link rename };'
-,
-)
+# ifelse(shipping_build, `true',
+#  `neverallow domain rootfs:file { create write setattr relabelto append unlink link rename };'
+# ,
+# )
 
 # Restrict context mounts to specific types marked with
 # the contextmount_type attribute.
-ifelse(shipping_build, `true',
-  `neverallow domain {fs_type -contextmount_type}:filesystem relabelto;'
-,
-  `neverallow domain {fs_type -contextmount_type -sdcard_posix}:filesystem relabelto;'
-)
+# ifelse(shipping_build, `true',
+#  `neverallow domain {fs_type -contextmount_type}:filesystem relabelto;'
+# ,
+neverallow domain {fs_type -contextmount_type -sdcard_posix}:filesystem relabelto;'
+# )
 
 # Ensure that context mount types are not writable, to ensure that
 # the write to /system restriction above is not bypassed via context=
@@ -358,17 +356,17 @@ neverallow { domain -servicemanager } *:binder set_context_mgr;
 
 # Only authorized processes should be writing to files in /data/dalvik-cache
 # (excluding /data/dalvik-cache/profiles, which is labeled differently)
-ifelse(shipping_build, `true',
-  `neverallow { domain -init -zygote -installd -dex2oat } dalvikcache_data_file:file no_w_file_perms;'
-,
-  `neverallow { domain -init -zygote -installd -dex2oat -system_server -recovery} dalvikcache_data_file:file no_w_file_perms;'
-)
+# ifelse(shipping_build, `true',
+#  `neverallow { domain -init -zygote -installd -dex2oat } dalvikcache_data_file:file no_w_file_perms;'
+# ,
+neverallow { domain -init -zygote -installd -dex2oat -system_server -recovery} dalvikcache_data_file:file no_w_file_perms;'
+# )
 
-ifelse(shipping_build, `true',
-  `neverallow { domain -init -installd -dex2oat -zygote } dalvikcache_data_file:dir no_w_dir_perms;'
-,
-  `neverallow { domain -init -installd -dex2oat -zygote -recovery } dalvikcache_data_file:dir no_w_dir_perms;'
-)
+# ifelse(shipping_build, `true',
+#  `neverallow { domain -init -installd -dex2oat -zygote } dalvikcache_data_file:dir no_w_dir_perms;'
+# ,
+neverallow { domain -init -installd -dex2oat -zygote -recovery } dalvikcache_data_file:dir no_w_dir_perms;'
+# )
 
 # Only system_server should be able to send commands via the zygote socket
 neverallow { domain -zygote -system_server } zygote:unix_stream_socket connectto;
@@ -437,11 +435,11 @@ neverallow ~domain domain:process { transition dyntransition };
 # Example type transition:
 #  mydomain.te:file_type_auto_trans(mydomain, system_data_file, new_file_type)
 #
-ifelse(shipping_build, `true',
-  `neverallow { domain -system_server -system_app -init -installd } system_data_file:file no_w_file_perms;'
-,
-  `neverallow { domain -system_server -system_app -init -installd -recovery } system_data_file:file no_w_file_perms;'
-)
+# ifelse(shipping_build, `true',
+#  `neverallow { domain -system_server -system_app -init -installd } system_data_file:file no_w_file_perms;'
+# ,
+neverallow { domain -system_server -system_app -init -installd -recovery } system_data_file:file no_w_file_perms;'
+# )
 
 # do not grant anything greater than r_file_perms and relabelfrom unlink
 # to installd
